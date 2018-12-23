@@ -113,9 +113,6 @@ def db_serialize_node(session, tid, language):
     Serialize node info.
     """
     # Contexts and Receivers relationship
-    configured = session.query(models.ReceiverContext).filter(models.ReceiverContext.context_id == models.Context.id,
-                                                              models.Context.tid == tid).count() > 0
-
     node_dict = ConfigFactory(session, tid, 'public_node').serialize()
     l10n_dict = NodeL10NFactory(session, tid).localized_dict(language)
 
@@ -124,7 +121,6 @@ def db_serialize_node(session, tid, language):
     ret_dict['root_tenant'] = tid == 1
     ret_dict['languages_enabled'] = models.EnabledLanguage.list(session, tid) if node_dict['wizard_done'] else list(LANGUAGES_SUPPORTED_CODES)
     ret_dict['languages_supported'] = LANGUAGES_SUPPORTED
-    ret_dict['configured'] = configured
 
     files = [u'logo', u'favicon', u'css', u'script']
     for x in files:
@@ -372,8 +368,7 @@ def serialize_receiver(session, user, language, data=None):
 
 
 def db_get_public_context_list(session, tid, language):
-    contexts = session.query(models.Context).filter(models.Context.id == models.ReceiverContext.context_id,
-                                                    models.Context.tid == tid)
+    contexts = session.query(models.Context).filter(models.Context.tid == tid)
 
     data = db_prepare_contexts_serialization(session, contexts)
 
@@ -384,7 +379,6 @@ def db_get_questionnaire_list(session, tid, language):
     questionnaires = session.query(models.Questionnaire).filter(models.Questionnaire.tid.in_(set([1, tid])),
                                                                 or_(models.Context.questionnaire_id == models.Questionnaire.id,
                                                                     models.Context.additional_questionnaire_id == models.Questionnaire.id),
-                                                                models.Context.id == models.ReceiverContext.context_id,
                                                                 models.Context.tid == tid)
 
     return [serialize_questionnaire(session, tid, questionnaire, language) for questionnaire in questionnaires]

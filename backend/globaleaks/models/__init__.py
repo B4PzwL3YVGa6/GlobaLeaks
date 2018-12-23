@@ -151,7 +151,6 @@ class Model(object):
     json_keys = []
     date_keys = []
     optional_references = []
-    list_keys = []
 
     def __init__(self, values=None, migrate=False):
         self.update(values)
@@ -244,9 +243,6 @@ class Model(object):
 
             if isinstance(ret[k], binary_type):
                 ret[k] = text_type(ret[k])
-
-        for k in self.list_keys:
-            ret[k] = []
 
         return ret
 
@@ -441,8 +437,6 @@ class _Context(Model):
       'enable_rc_to_wb_files',
       'enable_scoring_system'
     ]
-
-    list_keys = ['receivers']
 
     @declared_attr
     def __table_args__(self):
@@ -871,7 +865,6 @@ class _Questionnaire(Model):
 
     unicode_keys = ['key', 'name']
     bool_keys = ['editable']
-    list_keys = ['steps']
 
     @declared_attr
     def __table_args__(self):
